@@ -77,22 +77,20 @@ export default function NotificationListPres(props: Props) {
                     {notification.senderName}
                   </span>
                 </div>
+
                 {/* 댓글내용 및 게시글 내용 */}
                 <p className={styles.infoContainer__content}>
-                  {/* 시안 1 */}
-                  {/* {notification.content} */}
-                  {/* 시안 2 */}
                   {notification.title}
                 </p>
+
+
                 {/* 게시글 제목 */}
                 <p className={styles.infoContainer__title}>
-                  {/* 시안 1 */}
-                  {/* {notification.title}  */}
-                  {/* 시안 2*/}
                   {notification.type === 1
                     ? '게시글을 작성하였습니다.'
                     : '게시물에 댓글을 남겼습니다.'}
                 </p>
+
               </div>
 
               {/* 알람시간 */}
@@ -104,8 +102,6 @@ export default function NotificationListPres(props: Props) {
                     onClick={() => selecterId(notification.id)}
                   />
                 )}
-                {/* 시안 1 */}
-                {/* <span>{notification.type === 1 ? '게시글' : '댓글'}</span> */}
               </div>
             </div>
           );
