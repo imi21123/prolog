@@ -5,6 +5,7 @@ import styles from '../styles/myBlogCardList.module.scss';
 import PostsSearchCont from '@/features/search-input/container/PostsSearchCont';
 type dataProps = {
   data: MyBlogCardData[];
+  userId: string;
   sort: 'latest' | 'popular' | 'bookMark';
   setSort: (sort: 'latest' | 'popular' | 'bookMark') => void;
   items: MyBlogCardData[];
@@ -16,6 +17,7 @@ export default function MyBlogCardListPres({
   items,
   sortOptions,
   data,
+  userId,
 }: dataProps) {
   return (
     <>
@@ -31,11 +33,19 @@ export default function MyBlogCardListPres({
             className={styles.selectWrap}
           />
         </div>
-        {data.map((item) => (
-          <div className={styles.cardContainer} key={item.id}>
-            <LongCardPres data={item} />
-          </div>
-        ))}
+        {items.length === 0 ? (
+          <div className={styles.emptyMessage}>검색 결과가 없습니다.</div>
+        ) : (
+          items.map((item) => (
+            <div className={styles.cardContainer} key={item.id}>
+              <LongCardPres
+                className={styles.myCardContainer}
+                userId={userId}
+                data={item}
+              />
+            </div>
+          ))
+        )}
       </div>
     </>
   );

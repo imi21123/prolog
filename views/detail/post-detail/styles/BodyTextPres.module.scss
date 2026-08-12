@@ -13,25 +13,14 @@
   line-height: 1.8;
 
   img {
-    max-width: 500px;
-    max-height: 500px;
-    height: auto;
+    width: 100%;              
+    max-width: 700px;        
+    height: auto;            
     display: block;
     margin: 1.5rem auto;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   }
-
-
-  h1, h2, h3 {
-    font-weight: 600;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
-  }
-
-  h1 { font-size: 1.8rem; }
-  h2 { font-size: 1.5rem; }
-  h3 { font-size: 1.25rem; }
 
   p {
     margin: 1rem 0;
@@ -52,9 +41,17 @@
   }
 
 
+  ul {
+    list-style-type: disc; // 기본 점
+  }
+
+  ol {
+    list-style-type: decimal; // 숫자 목록
+  }
+
   pre {
-    background-color: #2d2d2d;
-    color: #f8f8f2;
+    background-color: $theme-shade-3;
+    color: $theme-text-1;
     padding: 1rem;
     border-radius: 8px;
     overflow-x: auto;
@@ -63,13 +60,22 @@
     font-size: 0.95em;
   }
 
-  blockquote {
-    border-left: 4px solid black;
-    padding-left: 1rem;
-    margin: 1rem 0;
-    color: #555;
-    background-color: #f9f9f9;
+   code {
+    background-color: $theme-shade-3;
+    color: $theme-red; 
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.95em;
   }
+
+  pre code {
+    // pre 내부의 code에는 별도 스타일링 방해되지 않도록
+    background: none;
+    color: inherit;
+    padding: 0;
+  }
+
 }
 
 .tagList {

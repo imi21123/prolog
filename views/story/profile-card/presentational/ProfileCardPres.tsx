@@ -13,6 +13,8 @@ type UserProps = {
   followerList: SubscribeUser;
   followList: SubscribeUser;
   userId: string;
+  currentId: string;
+  onFollowStatusChange: (isFollowing: boolean) => void;
 };
 
 export default function ProfileCardPres({
@@ -20,6 +22,8 @@ export default function ProfileCardPres({
   userId,
   followList,
   followerList,
+  currentId,
+  onFollowStatusChange,
 }: UserProps) {
   const defaultImg = '/svgs/my-card-background.jpg';
   const openModal = useModalStore((state) => state.action.open);
@@ -68,34 +72,55 @@ export default function ProfileCardPres({
             <div className={styles.userInfo}>
               <h2 className={styles.nameText}>{userData?.name}</h2>
               <div>
-                <SubscriptionCont userId={userId} />
+                {userId === currentId && currentId ? (
+                  <div style={{ display: 'none' }}></div>
+                ) : (
+                  <SubscriptionCont
+                    userId={userId}
+                    onFollowStatusChange={onFollowStatusChange}
+                  />
+                )}
               </div>
             </div>
-            <div
-              onClick={() => {
-                openModal(
-                  <SubscriptionListCont
-                    followList={followList}
-                    followerList={followerList}
-                  />,
-                  'center',
-                );
-              }}
-              className={styles.followContainer}
-            >
-              <button className={styles.followText}>
+            <div className={styles.followContainer}>
+              <button
+                className={styles.followText}
+                onClick={() => {
+                  openModal(
+                    <SubscriptionListCont
+                      followList={followList}
+                      followerList={followerList}
+                      isFollow={true}
+                    />,
+                    'center',
+                  );
+                }}
+              >
                 팔로워
                 <span className={styles.followNumberText}>
-                  {followerList.totalCount}
+                  {followerList?.totalCount ?? 0}
                 </span>
               </button>
-              <button className={styles.followText}>
+
+              <button
+                className={styles.followText}
+                onClick={() => {
+                  openModal(
+                    <SubscriptionListCont
+                      followList={followList}
+                      followerList={followerList}
+                      isFollow={false}
+                    />,
+                    'center',
+                  );
+                }}
+              >
                 팔로잉
                 <span className={styles.followNumberText}>
-                  {followList.totalCount}
+                  {followList?.totalCount ?? 0}
                 </span>
               </button>
-            </div>
+            </div>{' '}
           </div>
 
           {/* 소개글 */}

@@ -1,52 +1,87 @@
 'use client';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import MyBlogCardListPres from '../presentational/MyBlogCardListPres';
 import { MyBlogCardData } from '../types';
-
+import { PostListFilter } from '@/views/home/card-list/types';
+import { useSearch } from '@/shared/contexts/SearchContext';
+import { useInfiniteScrollTrigger } from '@/views/home/card-list/hooks/useInfiniteScrollTrigger';
+import { useMyStoryInfiniteScroll } from '../hook/useMyStoryInfiniteScroll';
+import { useResetOnFilterChange } from '@/views/home/card-list/hooks/useResetOnFilterChange';
+import { useMinSkeleton } from '@/views/home/card-list/hooks/useMinSkeleton';
+import Link from 'next/link';
+import Button from '@/shared/ui/button';
+import styles from '../styles/myBlogCardList.module.scss';
 const SORT_OPTIONS = [
   { label: '최신순', value: 'latest' },
   { label: '인기순', value: 'popular' },
   { label: '북마크', value: 'bookMark' },
 ];
-
-export default function MyBlogCardListCont() {
-  const data: MyBlogCardData[] = Array.from({ length: 20 }, (_, i) => ({
-    id: String(i + 1),
-    title: `CSR이란 ${i + 1}`,
-    desc: `CSR은 클라이언트 사이드 렌더링이라고 합니다. 이는 SEO에 좋지 못하지만, 좀더 인터렉티브한 디자인에는 좋은경험을 CSR은 클라이언트 사이드 렌더링이라고 합니다. 이는 SEO에 좋지 못하지만, 좀더 인터렉티브한 디자인에는 좋은경험을 ........CSR은 클라이언트 사이드 렌더링이라고 합니다. 이는 SEO에 좋지 못하지만, 좀더 인터렉티브한 디자인에는 좋은경험을 ........CSR은 클라이언트 사이드 렌더링이라고 합니다. 이는 SEO에 좋지 못하지만, 좀더 인터렉티브한 디자인에는 좋은경험을 ........CSR은 클라이언트 사이드 렌더링이라고 합니다. 이는 SEO에 좋지 못하지만, 좀더 인터렉티브한 디자인에는 좋은경험을 ........CSR은 클라이언트 사이드 렌더링이라고 합니다. 이는 SEO에 좋지 못하지만, 좀더 인터렉티브한 디자인에는 좋은경험을 ........ ${i + 1}`,
-    tags: [
-      'Start',
-      'React',
-      'TypeScript',
-      'Next',
-      'HTML',
-      'CSS',
-      'Java',
-      'MySql',
-      'End',
-    ],
-    userNickName: `user ${i + 1}`,
-    date: '2025-01-01',
-    commentCount: i,
-    loveCount: 50 + i,
-    imageUrl: '/svgs/image.svg',
-    isBookMarked: i % 2 === 0,
-  }));
+const MIN_SKELETON_TIME = 1000;
+export default function MyBlogCardListCont({
+  userId,
+}: { userId: string; id: string }) {
   const [sort, setSort] = useState<'latest' | 'popular' | 'bookMark'>('latest');
-  const [items, setItems] = useState<MyBlogCardData[]>([]);
-  const sortedItems = [...items].sort((a, b) => {
-    if (sort === 'popular') {
-      return Number(b.loveCount) - Number(a.loveCount);
+  const { searchParams } = useSearch();
+  const filter: PostListFilter = {
+    name: searchParams.name,
+    tags: searchParams.tags,
+    title: searchParams.title,
+    content: searchParams.content,
+    sort,
+    pageSize: 20,
+  };
+  const { posts, loading, error, hasMore, fetchNext, reset } =
+    useMyStoryInfiniteScroll(filter, userId);
+  useResetOnFilterChange([sort, searchParams], () => reset({ ...filter }));
+  const isMinSkeleton = useMinSkeleton(loading, MIN_SKELETON_TIME);
+  const loaderRef = useRef<HTMLDivElement>(null);
+  useInfiniteScrollTrigger(loaderRef, fetchNext, hasMore, loading);
+  const mappedItems: MyBlogCardData[] = posts.map((post) => ({
+    id: String(post.id),
+    title: post.title,
+    desc: post.content,
+    tags: post.tags,
+    userProfileImage: post.userProfileImage ?? '/svgs/profile.svg',
+    userName: post.name ?? '',
+    date: post.createdAt,
+    commentCount: post.commentCount ?? 0,
+    loveCount: post.loveCount ?? 0,
+    imageUrl: post.thumbnailUrl ?? null,
+    isLiked: post.isLiked ?? false,
+  }));
+  const uniqueItems: MyBlogCardData[] = mappedItems.filter(
+    (item, idx, arr) => arr.findIndex((i) => i.id === item.id) === idx,
+  );
+  const isFilterEmpty = () => {
+    return (
+      !searchParams.name &&
+      (!searchParams.tags || searchParams.tags.length === 0) &&
+      !searchParams.title &&
+      !searchParams.content
+    );
+  };
+  if (!loading && uniqueItems.length === 0) {
+    if (isFilterEmpty()) {
+      return (
+        <div className={styles.notFound}>
+          <p>첫 글을 남겨서 당신의 이야기를 시작해보세요 😀</p>
+          <Link href="/member/story">
+            <Button variants="active">글 등록하러 가기</Button>
+          </Link>
+        </div>
+      );
     }
-    return Number(b.id) - Number(a.id);
-  });
+  }
   return (
-    <MyBlogCardListPres
-      sort={sort}
-      setSort={setSort}
-      items={sortedItems}
-      sortOptions={SORT_OPTIONS}
-      data={data}
-    />
+    <>
+      <MyBlogCardListPres
+        sort={sort}
+        setSort={setSort}
+        items={uniqueItems}
+        sortOptions={SORT_OPTIONS}
+        data={mappedItems}
+        userId={userId}
+      />
+    </>
   );
 }

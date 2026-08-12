@@ -1,7 +1,7 @@
 'use client';
 
 // package
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -14,6 +14,7 @@ import {
   SunIcon,
   MoonIcon,
 } from '@radix-ui/react-icons';
+import { useRouter } from 'next/navigation';
 
 // slice
 import styles from '../styles/HeaderPres.module.scss';
@@ -26,8 +27,17 @@ import { LoginForm } from '@/widgets/login';
 import { useThemeStore } from '@/shared/stores/useThemeStore';
 import { NotificationModalCont } from '@/widgets/notification';
 import { useOnClickOutside } from '@/shared/hooks/useOnClickOutside';
+import { useLockBodyScroll } from '@/shared/hooks/useLockBodyScroll';
+import { usePostEditorStore } from '@/views/post/stores/usePostEditorStore';
 
-export default function HeaderPres({ username }: { username: string }) {
+type Props = {
+  username: string;
+  profileImg: string;
+};
+
+export default function HeaderPres({ username, profileImg }: Props) {
+  const router = useRouter();
+
   const { open } = useModalStore((state) => state.action);
   // 로그인 여부
   const { data } = useSession();
@@ -55,6 +65,10 @@ export default function HeaderPres({ username }: { username: string }) {
   const notificationDropdownRef = useRef<HTMLDivElement>(null);
 
   const searchRef = useRef<{ resetAll: () => void }>(null);
+
+  useLockBodyScroll(isNotificationDropdownVisible || isProfileDropdownVisible);
+
+  const { clearSelectedPost } = usePostEditorStore();
 
   // 검색창 영역 밖 클릭 시 검색창 닫기
   useOnClickOutside(
@@ -109,6 +123,15 @@ export default function HeaderPres({ username }: { username: string }) {
     setIsNotificationDropdownVisible((prev) => !prev);
   };
 
+  const handleWriteClick = () => {
+    if (data?.user) {
+      router.push('/member/story');
+      clearSelectedPost();
+    } else {
+      open(<LoginForm />, 'center');
+    }
+  };
+
   return (
     <header className={styles.header}>
       {/* 로고 */}
@@ -128,7 +151,7 @@ export default function HeaderPres({ username }: { username: string }) {
           isSearchVisible ? styles.visible : ''
         }`}
       >
-        <PostsSearchCont key={searchKey} />
+        <PostsSearchCont key={searchKey} navigateToHomeOnSearch={true} />
         {/* 검색창이 열려 있을 때 닫기 버튼 표시 */}
         {isSearchVisible && (
           <button
@@ -167,10 +190,8 @@ export default function HeaderPres({ username }: { username: string }) {
         </button>
 
         {/* 글 작성 버튼 */}
-        <button className={styles.writeBtn}>
-          <Link href="/member/story">
-            <Pencil1Icon className={styles.btnLogo} />
-          </Link>
+        <button className={styles.writeBtn} onClick={handleWriteClick}>
+          <Pencil1Icon className={styles.btnLogo} />
         </button>
 
         {/* 로그인/로그아웃 및 프로필 드롭다운 */}
@@ -194,6 +215,7 @@ export default function HeaderPres({ username }: { username: string }) {
                 type="button"
               >
                 <BellIcon className={styles.btnLogo} />
+                <span className={styles.alarmBadge} />
               </button>
               {isNotificationDropdownVisible && (
                 <div className={styles.notificationDropdownMenu}>
@@ -211,10 +233,11 @@ export default function HeaderPres({ username }: { username: string }) {
                 type="button"
               >
                 <Image
-                  src="/svgs/profile.svg"
+                  src={profileImg}
                   alt="프로필"
                   width={24}
                   height={24}
+                  className={styles.profileImg}
                 />
               </button>
               <button onClick={handleProfileBtnClick}>

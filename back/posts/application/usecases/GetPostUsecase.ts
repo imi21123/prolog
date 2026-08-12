@@ -21,12 +21,17 @@ export class GetPostUsecase {
       post.updatedAt ?? null,
       post.tags ?? [],
       post.aiSummary ?? null,
+      post.isPublic,
+      post.useAi,
+      post.categoryId,
+      post.authorId,
       post.profileImage ?? null,
       post.nickname,
       post.isLiked,
       post.isBookmarked,
       post.following,
       post.likeCount,
+      post.isMine,
     );
   }
 }

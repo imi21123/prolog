@@ -63,7 +63,25 @@
     :global(.w-md-editor-preview) {
         /* 미리보기 커스텀 */
        // box-shadow: none;    
-     
+       ul,
+  ol {
+    margin: 0 0 1em 1.5em;
+    padding-left: 1.5em;
+  }
+
+  ul {
+    list-style-type: disc;
+  }
+
+  ol {
+    list-style-type: decimal;
+  }
+
+  li {
+    margin-bottom: 0.3em;
+    line-height: 1.6;
+    color: $theme-text-1;
+  }
     }
 }
 
@@ -101,7 +119,6 @@
   border-radius: 8px;
   overflow: hidden;
   width: fit-content;
-
 }
 
 .toggleButton {
@@ -113,7 +130,9 @@
   color: $theme-white;
   opacity: 0.9;
   font-size: $font-base-size;
-
+  display: flex;
+  align-items: center;
+  justify-content: center;
   &:not(:last-child) {
     border-right: 1px solid $theme-shade-2;
   }
@@ -127,5 +146,3 @@
    opacity: 1
 
 }
-
-

@@ -42,6 +42,8 @@ export class PrPostRepository implements PostsRepository {
         tags: true, // 게시글 태그
         aiSummary: true, // ai 요약
         useAi: true, // ai 사용여부
+        categoryId: true,
+        isPublic: true,
 
         // 유저 정보
         user: {
@@ -86,12 +88,15 @@ export class PrPostRepository implements PostsRepository {
       following = !!followRow;
     }
 
+    const isMine = currentUserId === postDetail.user.id;
+
     return {
       ...postDetail,
       createdAt: postDetail.createdAt.toISOString(),
       updatedAt: postDetail.updatedAt
         ? postDetail.updatedAt.toISOString()
         : null,
+      authorId: postDetail.user.id,
       profileImage: postDetail.user.profileImg,
       nickname: postDetail.user.name,
       isLiked: Boolean(liked),
@@ -99,6 +104,7 @@ export class PrPostRepository implements PostsRepository {
       following: Boolean(following),
       likeCount: postDetail._count.likes,
       aiSummary: postDetail.aiSummary as AiSummaryType[] | null,
+      isMine,
     };
   }
 
@@ -109,5 +115,21 @@ export class PrPostRepository implements PostsRepository {
     });
     if (!post) throw new Error('Post not found');
     return post;
+  }
+
+  async findById(
+    postId: number,
+  ): Promise<{ id: number; userId: string } | null> {
+    const post = await prisma.blogPost.findUnique({
+      where: { id: postId },
+      select: { id: true, userId: true },
+    });
+    return post;
+  }
+
+  async deletePost(postId: number): Promise<void> {
+    await prisma.blogPost.delete({
+      where: { id: postId },
+    });
   }
 }
